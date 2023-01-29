@@ -40,6 +40,7 @@ class Photo(db.Model):
 
 # TODO: connect to database
 
+
 # TODO: create database table
 
 
@@ -55,9 +56,11 @@ def upload():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    login_form = LoginForm()
-    return render_template('login.html', title='Sign In', form=login_form)
-
+    if request.method == 'POST':
+        return redirect(url_for('upload'))
+    if request.method == 'GET':
+        login_form = LoginForm()
+        return render_template('login.html', title='Sign In', form=login_form)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
