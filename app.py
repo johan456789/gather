@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICAT
 app.config['SECRET_KEY'] = Config.SECRET_KEY
 db = SQLAlchemy(app)
 
-
 # Database models
 
 class User(db.Model):
@@ -51,11 +50,25 @@ def db_add_user(name, email, password, contact):
     db.session.add(user)
     db.session.commit()
 
+def db_upload_photos(friend_name, friend_contact, photo_path, contact, uploader_id):
+    photo = Photo(friend_name='John',
+                  friend_contact='0987654321',
+                  photo_path='photo.jpg',
+                  contact='0987654321',
+                  uploader_id=1)
+    db.session.add(photo)
+    db.session.commit()
+
 def populating_example_data():
     db_add_user('John',
                 'johndoe@example.com',
                 'password',
                 '0987654321')
+    db_upload_photos('John',
+                    '0987654321',
+                    'photo.jpg',
+                    '0987654321',
+                    1)
 
 with app.app_context():
     create_new_db()
