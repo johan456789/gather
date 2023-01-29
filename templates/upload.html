@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Reunion</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        {% block content %}
+        <h1>let's gather again</h1>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.friend_name.label }}<br>
+                {{ form.friend_name(size=32) }}<br>
+                {{ form.friend_contact.label }}<br>
+                {{ form.friend_contact(size=32) }}<br>
+                {{ form.message.label }}<br>
+                {{ form.message(size=32) }}<br>
+                {{ form.upload.label }}
+                {{ form.upload }}<br>
+                {{ form.times_per.label }}
+                {{ form.times_per }}
+                {{ form.duration.label }}
+                {{ form.duration }}<br>
+            </p>
+            <p>{{ form.submit() }}</p>
+            
+        </form>
+        {% endblock %}
+    </body>
+</html>

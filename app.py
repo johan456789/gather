@@ -1,34 +1,22 @@
 import os
 from flask import Flask, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
-
 from sqlalchemy.sql import func
 
+from config import Config
+from forms import LoginForm, RegisterForm, UploadPhotoForm
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql:///username:password@host:port/database_name'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+# app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['SECRET_KEY'] = Config.SECRET_KEY
 db = SQLAlchemy(app)
 
-# TODO: create database
-''' (example)
-class Student(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    firstname = db.Column(db.String(100), nullable=False)
-    lastname = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(80), unique=True, nullable=False)
-    age = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime(timezone=True),
-                           server_default=func.now())
-    bio = db.Column(db.Text)
 
-    def __repr__(self):
-        return f'<Student {self.firstname}>'
-'''
-## TODO: USER TABLE
-'''
-USER
-id, name, email, password, contact
-'''
+# Database models
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -38,29 +26,40 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.email}, {self.name}>'
 
-## TODO: PHOTO TABLE
-'''
-PHOTO
-email, upload_date, photo
-'''
 class Photo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)  # id for photo
     friend_name = db.Column(db.String(100), nullable=False)
-    friend_contact = dbgit.Column(db.String(100), nullable=False)
-
-    upload_date = db.Column(db.DateTime(timezone=True),
-                           server_default=func.now())
+    friend_contact = db.Column(db.String(100), nullable=False)
+    upload_date = db.Column(db.DateTime(timezone=True), server_default=func.now())
     photo_path = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(100), nullable=False)
     activity = db.Column(db.String(100), nullable=True)
+    uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # id of the uploader
+    def __repr__(self):
+        return f'<Photo {self.friend_name}, {self.friend_contact}, {self.photo_path}>'
 
 # TODO: connect to database
 
 # TODO: create database table
 
 
-# TODO: 
-
 @app.route("/")
 def main():
     return render_template('index.html')
+
+@app.route("/upload")
+def upload():
+    upload_form = UploadPhotoForm()
+    return render_template('upload.html', title='Upload', form=upload_form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    login_form = LoginForm()
+    return render_template('login.html', title='Sign In', form=login_form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    register_form = RegisterForm()
+    return render_template('register.html', title='Register', form=register_form)
