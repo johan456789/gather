@@ -43,6 +43,17 @@ class User(db.Model):
 PHOTO
 email, upload_date, photo
 '''
+class Photo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  # id for photo
+    friend_name = db.Column(db.String(100), nullable=False)
+    friend_contact = db.Column(db.String(100), nullable=False)
+    upload_date = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    photo_path = db.Column(db.String(100), nullable=False)
+    contact = db.Column(db.String(100), nullable=False)
+    activity = db.Column(db.String(100), nullable=True)
+    uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # id of the uploader
+    def __repr__(self):
+        return f'<Photo {self.friend_name}, {self.friend_contact}, {self.photo_path}>'
 
 # TODO: connect to database
 
