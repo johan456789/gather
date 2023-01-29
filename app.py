@@ -38,11 +38,28 @@ class Photo(db.Model):
     def __repr__(self):
         return f'<Photo {self.friend_name}, {self.friend_contact}, {self.photo_path}>'
 
-# TODO: connect to database
 
+def create_new_db():
+    db.drop_all()  # clear database
+    db.create_all()
+    
+def db_add_user(name, email, password, contact):
+    user = User(name=name,
+                email=email,
+                password=password,
+                contact=contact)
+    db.session.add(user)
+    db.session.commit()
 
-# TODO: create database table
+def populating_example_data():
+    db_add_user('John',
+                'johndoe@example.com',
+                'password',
+                '0987654321')
 
+with app.app_context():
+    create_new_db()
+    populating_example_data()
 
 @app.route("/")
 def main():
