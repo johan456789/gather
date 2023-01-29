@@ -94,5 +94,9 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    register_form = RegisterForm()
-    return render_template('register.html', title='Register', form=register_form)
+    if request.method == 'GET':
+        register_form = RegisterForm()
+        return render_template('register.html', title='Register', form=register_form)
+    if request.method == 'POST':
+        register_form = RegisterForm()
+        db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
