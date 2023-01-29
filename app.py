@@ -35,6 +35,16 @@ email, password, name, contact
 PHOTO
 email, upload_date, photo
 '''
+class Photo(it.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    friend_name = db.Column(db.String(100), nullable=False)
+    friend_contact = db.Column(db.String(100), nullable=False)
+
+    upload_date = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
+    photo_path = db.Column(db.String(100), nullable=False)
+    contact = db.Column(db.String(100), nullable=False)
+    activity = db.Column(db.String(100), nullable=True)
 
 # TODO: connect to database
 
