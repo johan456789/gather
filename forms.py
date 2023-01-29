@@ -35,6 +35,6 @@ class UploadPhotoForm(FlaskForm):
         FileRequired(),
         FileAllowed(['jpg', 'jpeg', 'png'], 'JPG and PNG images only!')
     ])
-    times_per = SelectField('Times per', choices=['Once a'])  # TODO: check with designer
-    duration = SelectField('duration', choices=['Month'])  # TODO: check with designer
+    times_per = SelectField(label='Times per', choices=['Once a', 'Twice a'])  # TODO: check with designer
+    duration = SelectField(label='duration', choices=['Month', 'Week'])  # TODO: check with designer
     submit = SubmitField('Submit')  # TODO: check with designer, missing in design
