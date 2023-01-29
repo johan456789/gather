@@ -46,13 +46,14 @@ def main():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
     return render_template('login.html', title='Sign In', form=login_form)
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     register_form = RegisterForm()
     return render_template('register.html', title='Register', form=register_form)
