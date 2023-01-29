@@ -1,12 +1,15 @@
 import os
 from flask import Flask, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
-
 from sqlalchemy.sql import func
 
+from config import Config
+from forms import LoginForm, RegisterForm
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql:///username:password@host:port/database_name'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['SECRET_KEY'] = Config.SECRET_KEY
 db = SQLAlchemy(app)
 
 
@@ -38,8 +41,18 @@ class Photo(db.Model):
 # TODO: create database table
 
 
-# TODO: 
-
 @app.route("/")
 def main():
     return render_template('index.html')
+
+
+@app.route('/login')
+def login():
+    login_form = LoginForm()
+    return render_template('login.html', title='Sign In', form=login_form)
+
+
+@app.route('/register')
+def register():
+    register_form = RegisterForm()
+    return render_template('register.html', title='Register', form=register_form)
