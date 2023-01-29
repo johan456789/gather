@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 
 from config import Config
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, UploadPhotoForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
@@ -45,6 +45,10 @@ class Photo(db.Model):
 def main():
     return render_template('index.html')
 
+@app.route("/upload")
+def upload():
+    upload_form = UploadPhotoForm()
+    return render_template('upload.html', title='Upload', form=upload_form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
