@@ -18,3 +18,11 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 TWILIO_ACCOUNT_SID=your_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 ```
+
+### Run the app
+
+```shell
+flask --debug run
+```
+
+This runs a development server. The `debug` tag enables auto reloading when there's a code change.
