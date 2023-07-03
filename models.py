@@ -87,6 +87,7 @@ with app.app_context():
     create_new_db() #creates a new database
     populating_example_data() #populates the database with the example data
     
+#this is like what's in app/routes.py (usually in a separate file)
 @app.route("/")
 def main():
     return render_template('index.html')
@@ -96,6 +97,9 @@ def upload():
     upload_form = UploadPhotoForm()
     return render_template('upload.html', title='Upload', form=upload_form)
     
+    #render template takes in the data passed to it, renders it to the template
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -111,10 +115,7 @@ def register():
         return render_template('register.html', title='Register', form=register_form)
     if request.method == 'POST':
         register_form = RegisterForm()
-        # db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
-            #comment out the line above since db_add_user doesn't work rn?
-        return redirect(url_for('upload'))  # After user registers, should go to upload
-    #should redirect to the upload page
+        db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
 
 if __name__ == '__main__':
     app.run()
