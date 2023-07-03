@@ -1,9 +1,11 @@
 import os
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, abort, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
+from flask_bcrypt import generate_password_hash, check_password_hash
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, set_access_cookies, verify_jwt_in_request
 
-from config import Config
+from config import JWT_SECRET_KEY, JWT_TOKEN_LOCATION, Config
 from forms import LoginForm, RegisterForm, UploadPhotoForm
 
 app = Flask(__name__)
@@ -12,7 +14,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'da
 # app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
 app.config['SECRET_KEY'] = Config.SECRET_KEY
+app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+app.config['JWT_TOKEN_LOCATION'] = JWT_TOKEN_LOCATION
+app.config['JWT_COOKIE_SECURE'] = not app.debug
 db = SQLAlchemy(app)
+jwt = JWTManager(app)
+
 
 # Database models
 
@@ -22,6 +29,12 @@ class User(db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(30), nullable=False)
+
+    def __init__(self, name, email, password, contact):
+        self.name = name
+        self.email = email
+        self.password = generate_password_hash(password).decode('utf8')  # bcrypt adds salt automatically
+        self.contact = contact
     def __repr__(self):
         return f'<User {self.email}, {self.name}>'
 
@@ -85,9 +98,19 @@ def upload():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@jwt_required(optional=True, locations=JWT_TOKEN_LOCATION)
 def login():
     if request.method == 'POST':
-        return redirect(url_for('upload'))
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            abort(401, description='Incorrect email or password.')
+        else:
+            access_token = create_access_token(identity=user.id)
+            resp = make_response(redirect(url_for('upload')))
+            set_access_cookies(resp, access_token)
+            return resp
     if request.method == 'GET':
         login_form = LoginForm()
         return render_template('login.html', title='Sign In', form=login_form)
