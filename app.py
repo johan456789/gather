@@ -62,6 +62,7 @@ def db_add_user(name, email, password, contact):
                 contact=contact)
     db.session.add(user)
     db.session.commit()
+    return user
 
 def db_upload_photos(friend_name, friend_contact, photo_path, contact, uploader_id):
     photo = Photo(friend_name='John',
@@ -115,11 +116,24 @@ def login():
         login_form = LoginForm()
         return render_template('login.html', title='Sign In', form=login_form)
 
+
 @app.route('/register', methods=['GET', 'POST'])
+@jwt_required(optional=True, locations=JWT_TOKEN_LOCATION)
 def register():
     if request.method == 'GET':
         register_form = RegisterForm()
         return render_template('register.html', title='Register', form=register_form)
     if request.method == 'POST':
-        register_form = RegisterForm()
-        db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        contact = request.form['contact']
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            abort(409, description='Email already exists.')
+        user = db_add_user(name, email, password, contact)
+
+        access_token = create_access_token(user.id)
+        resp = make_response(redirect(url_for('upload')))
+        set_access_cookies(resp, access_token)
+        return resp
