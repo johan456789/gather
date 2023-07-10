@@ -32,6 +32,10 @@ class User(db.Model):
     #defines a string representation of a User object.
     def __repr__(self):
         return f'<User {self.email}, {self.name}>'
+    
+    # def _init_(self, name, email):
+    #     self.name = name
+    #     self.email = email
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # id for photo
@@ -53,7 +57,8 @@ def create_new_db():
     
 def db_add_user(name, email, password, contact): #adds new user to the database
 
-#creates new user
+#should add check to see if user is already in database
+    
     user = User(name=name,
                 email=email,
                 password=password,
@@ -91,6 +96,10 @@ with app.app_context():
 def main():
     return render_template('index.html')
 
+@app.route("/view")
+def view():
+    return render_template("view.html", values=User.query.all())
+
 @app.route("/upload")
 def upload():
     upload_form = UploadPhotoForm()
@@ -111,10 +120,11 @@ def register():
         return render_template('register.html', title='Register', form=register_form)
     if request.method == 'POST':
         register_form = RegisterForm()
-        # db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
+        db_add_user(register_form.name.data, register_form.email.data, register_form.password.data, register_form.contact.data)
             #comment out the line above since db_add_user doesn't work rn?
-        return redirect(url_for('upload'))  # After user registers, should go to upload
-    #should redirect to the upload page
+        # flash("Account successfully created!")
+        return redirect(url_for('upload'))  
+    
 
 if __name__ == '__main__':
-    app.run()
+     app.run()

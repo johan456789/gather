@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View all users</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        {% block content %}
+            {% for item in values %}
+                <p>Name: {{item.name}}</p>
+            {% endfor %}
+        {% endblock %}
+    </body>
+</html>
