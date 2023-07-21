@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv, find_dotenv
 
+
 # this looks for a .env file in the directory and loads it up load_dotenv(find_dotenv())
 
 class Config(object):
@@ -10,3 +11,7 @@ class Config(object):
     TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
     TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
     EXAMPLE_PHOTO_URL = os.environ.get('EXAMPLE_PHOTO_URL')
+
+
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+JWT_TOKEN_LOCATION = ['cookies']
