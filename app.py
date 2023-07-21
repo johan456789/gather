@@ -1,9 +1,11 @@
 import os
-from flask import Flask, render_template, request, url_for, redirect, abort, jsonify, make_response
+from functools import wraps
+from flask import Flask, render_template, request, url_for, redirect, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
+import jwt
 from flask_bcrypt import generate_password_hash, check_password_hash
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, set_access_cookies, verify_jwt_in_request
+from flask_jwt_extended import JWTManager, create_access_token, set_access_cookies
 
 from config import JWT_SECRET_KEY, JWT_TOKEN_LOCATION, Config
 from forms import LoginForm, RegisterForm, UploadPhotoForm
@@ -17,8 +19,9 @@ app.config['SECRET_KEY'] = Config.SECRET_KEY
 app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
 app.config['JWT_TOKEN_LOCATION'] = JWT_TOKEN_LOCATION
 app.config['JWT_COOKIE_SECURE'] = not app.debug
+app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # turn off flask_wtf csrf check, use flask_jwt_extended csrf check instead
 db = SQLAlchemy(app)
-jwt = JWTManager(app)
+jwt_manager = JWTManager(app)
 
 
 # Database models
@@ -88,9 +91,32 @@ with app.app_context():
     create_new_db()
     populating_example_data()
 
+
+def redirect_to_upload_if_token_valid(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        access_token = request.cookies.get('access_token_cookie')
+        print('decorator run')
+        if access_token:
+            print('access token exists')
+            try:
+                jwt.decode(access_token, JWT_SECRET_KEY, algorithms=['HS256'])  # type: ignore
+                return redirect(url_for('upload'))
+            except jwt.ExpiredSignatureError as e:
+                print(e)
+            except jwt.InvalidSignatureError as e:
+                print(e)
+            except jwt.InvalidTokenError as e:
+                print(e)
+        return f(*args, **kwargs)
+    return decorated
+
+
 @app.route("/")
+@redirect_to_upload_if_token_valid
 def main():
     return render_template('index.html')
+
 
 @app.route("/upload")
 def upload():
@@ -98,8 +124,8 @@ def upload():
     return render_template('upload.html', title='Upload', form=upload_form)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-@jwt_required(optional=True, locations=JWT_TOKEN_LOCATION)
+@app.route('/login', methods=['GET', 'POST'])  # type: ignore
+@redirect_to_upload_if_token_valid
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -117,8 +143,8 @@ def login():
         return render_template('login.html', title='Sign In', form=login_form)
 
 
-@app.route('/register', methods=['GET', 'POST'])
-@jwt_required(optional=True, locations=JWT_TOKEN_LOCATION)
+@app.route('/register', methods=['GET', 'POST'])  # type: ignore
+@redirect_to_upload_if_token_valid
 def register():
     if request.method == 'GET':
         register_form = RegisterForm()
